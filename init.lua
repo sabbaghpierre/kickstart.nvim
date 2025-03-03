@@ -1023,7 +1023,7 @@ require('lazy').setup({
 
 -- Setup flutter-tools.nvim
 require('flutter-tools').setup {} -- use defaults
-
+require('flutter-bloc').setup {}
 -- Setup Telescope File Browser
 require('telescope').load_extension 'file_browser'
 -- open file_browser with the path of the current buffer
