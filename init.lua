@@ -1024,14 +1024,19 @@ require('lazy').setup({
 -- Setup flutter-tools.nvim
 require('flutter-tools').setup {} -- use defaults
 require('flutter-bloc').setup {}
--- Setup oil.nvim
-require("oil").setup()
--- open file_browser with the path of the current buffer
-vim.keymap.set('n', '<space>fb', function()
-  local location = vim.api.nvim_buf_get_name(0)
-  location = location:gsub('^(.*)/.*$', '%1')
-  require('oil').toggle_float(location)
-end)
-
+-- -- Setup oil.nvim
+-- require('oil').setup()
+-- -- open file_browser with the path of the current buffer
+-- vim.keymap.set('n', '<space>fb', function()
+--   local location = vim.api.nvim_buf_get_name(0)
+--   location = location:gsub('^(.*)/.*$', '%1')
+--   require('oil').toggle_float(location)
+-- end)
+-- Setup nvim-tree.nvim
+require('nvim-tree').setup {}
+local function open_nvim_tree()
+  require('nvim-tree.api').tree.open()
+end
+vim.api.nvim_create_autocmd({ 'VimEnter' }, { callback = open_nvim_tree })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
