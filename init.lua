@@ -1033,7 +1033,24 @@ require('flutter-bloc').setup {}
 --   require('oil').toggle_float(location)
 -- end)
 -- Setup nvim-tree.nvim
-require('nvim-tree').setup {}
+require('nvim-tree').setup {
+  renderer = {
+    icons = {
+      git_placement = 'after', -- or "after" (placement of the Git icon)
+      glyphs = {
+        git = {
+          unstaged = '•', -- Modified (VS Code uses a dot)
+          staged = '+', -- Staged (VS Code uses a plus)
+          unmerged = '!', -- Merge conflict (VS Code uses an exclamation)
+          renamed = '→', -- Renamed (VS Code uses an arrow)
+          untracked = '?', -- New/untracked (VS Code uses a question mark)
+          deleted = '-', -- Deleted (VS Code uses a minus)
+          ignored = ' ', -- No icon for ignored (or use "#" if you prefer)
+        },
+      },
+    },
+  },
+}
 local function open_nvim_tree()
   require('nvim-tree.api').tree.open()
 end
