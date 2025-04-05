@@ -1023,7 +1023,6 @@ require('lazy').setup({
 
 -- Setup flutter-tools.nvim
 require('flutter-tools').setup {} -- use defaults
-require('flutter-bloc').setup {}
 -- -- Setup oil.nvim
 -- require('oil').setup()
 -- -- open file_browser with the path of the current buffer
