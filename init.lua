@@ -903,7 +903,9 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'kanagawa-wave'
+      vim.cmd.colorscheme 'carbonfox'
     end,
   },
 
@@ -1056,3 +1058,8 @@ end
 vim.api.nvim_create_autocmd({ 'VimEnter' }, { callback = open_nvim_tree })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+require('null-ls').setup {
+  sources = {
+    require('flutter-bloc').code_actions,
+  },
+}
