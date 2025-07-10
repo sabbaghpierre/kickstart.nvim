@@ -1024,7 +1024,11 @@ require('lazy').setup({
 })
 
 -- Setup flutter-tools.nvim
-require('flutter-tools').setup {} -- use defaults
+require('flutter-tools').setup {
+  dev_log = {
+    open_cmd = 'botright 15split',
+  },
+} -- use defaults
 -- -- Setup oil.nvim
 -- require('oil').setup()
 -- -- open file_browser with the path of the current buffer
