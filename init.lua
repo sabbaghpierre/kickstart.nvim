@@ -207,6 +207,10 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Neo-Tree Keymaps
+vim.keymap.set('n', '<leader>fe', '<cmd>Neotree filesystem reveal float<CR>', { desc = '[F]ile [E]xplorer (float)' })
+vim.keymap.set('n', '<leader>fb', '<cmd>Neotree buffers reveal float<CR>', { desc = '[F]ile [B]uffers' })
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -937,9 +941,9 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      -- vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'tokyonight-night'
       -- vim.cmd.colorscheme 'kanagawa-wave'
-      vim.cmd.colorscheme 'carbonfox'
+      -- vim.cmd.colorscheme 'carbonfox'
     end,
   },
 
@@ -1089,28 +1093,28 @@ require('flutter-tools').setup {
 --   require('oil').toggle_float(location)
 -- end)
 -- Setup nvim-tree.nvim
-require('nvim-tree').setup {
-  renderer = {
-    icons = {
-      git_placement = 'after', -- or "after" (placement of the Git icon)
-      glyphs = {
-        git = {
-          unstaged = '•', -- Modified (VS Code uses a dot)
-          staged = '+', -- Staged (VS Code uses a plus)
-          unmerged = '!', -- Merge conflict (VS Code uses an exclamation)
-          renamed = '→', -- Renamed (VS Code uses an arrow)
-          untracked = '?', -- New/untracked (VS Code uses a question mark)
-          deleted = '-', -- Deleted (VS Code uses a minus)
-          ignored = ' ', -- No icon for ignored (or use "#" if you prefer)
-        },
-      },
-    },
-  },
-}
-local function open_nvim_tree()
-  require('nvim-tree.api').tree.open()
-end
-vim.api.nvim_create_autocmd({ 'VimEnter' }, { callback = open_nvim_tree })
+-- require('nvim-tree').setup {
+--   renderer = {
+--     icons = {
+--       git_placement = 'after', -- or "after" (placement of the Git icon)
+--       glyphs = {
+--         git = {
+--           unstaged = '•', -- Modified (VS Code uses a dot)
+--           staged = '+', -- Staged (VS Code uses a plus)
+--           unmerged = '!', -- Merge conflict (VS Code uses an exclamation)
+--           renamed = '→', -- Renamed (VS Code uses an arrow)
+--           untracked = '?', -- New/untracked (VS Code uses a question mark)
+--           deleted = '-', -- Deleted (VS Code uses a minus)
+--           ignored = ' ', -- No icon for ignored (or use "#" if you prefer)
+--         },
+--       },
+--     },
+--   },
+-- }
+-- local function open_nvim_tree()
+--   require('nvim-tree.api').tree.open()
+-- end
+-- vim.api.nvim_create_autocmd({ 'VimEnter' }, { callback = open_nvim_tree })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 require('null-ls').setup {
