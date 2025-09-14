@@ -1,6 +1,7 @@
 return {
   'nvim-flutter/flutter-tools.nvim',
-  lazy = false,
+  ft = { 'dart' }, -- load when editing Dart files
+  cmd = { 'FlutterRun' },
   dependencies = {
     'nvim-lua/plenary.nvim',
     'stevearc/dressing.nvim', -- optional for vim.ui.select
