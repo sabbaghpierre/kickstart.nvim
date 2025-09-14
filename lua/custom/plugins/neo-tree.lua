@@ -18,6 +18,10 @@ return {
     'nvim-tree/nvim-web-devicons',
     'MunifTanjim/nui.nvim',
   },
+  keys = {
+    { '<leader>fe', '<cmd>Neotree filesystem reveal float<CR>', desc = '[F]ile [E]xplorer (float)' },
+    { '<leader>fb', '<cmd>Neotree buffers reveal float<CR>', desc = '[F]ile [B]uffers' },
+  },
   config = function()
     require('neo-tree').setup {
       close_if_last_window = true,
