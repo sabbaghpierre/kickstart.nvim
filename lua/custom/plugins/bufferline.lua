@@ -18,5 +18,8 @@ return {
     vim.keymap.set('n', '<Leader>bb', '<cmd>BufferLinePick<CR>', { desc = 'Pick Buffer' })
     -- Close current buffer
     vim.keymap.set('n', '<Leader>bd', '<cmd>bdelete<CR>', { desc = 'Delete Buffer' })
+
+    -- NEW: Close all buffers except current one
+    vim.keymap.set('n', '<Leader>bo', '<cmd>BufferLineCloseOthers<CR>', { desc = 'Close Other Buffers' })
   end,
 }
