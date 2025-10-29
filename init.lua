@@ -139,7 +139,7 @@ vim.opt.signcolumn = 'yes'
 vim.opt.updatetime = 250
 
 -- Decrease mapped sequence wait time
-vim.opt.timeoutlen = 300
+vim.opt.timeoutlen = 500
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -192,6 +192,10 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Create splits
+vim.keymap.set('n', '<leader>-', '<cmd>split<CR>', { desc = 'Split horizontal' })
+vim.keymap.set('n', '<leader>|', '<cmd>vsplit<CR>', { desc = 'Split vertical' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -468,6 +472,7 @@ require('lazy').setup({
   {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
+    event = { 'BufReadPre', 'BufNewFile' }, -- Load when opening files
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       -- Mason must be loaded before its dependents so we need to set it up here.
@@ -663,7 +668,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {}, -- Go language server
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -688,6 +693,20 @@ require('lazy').setup({
               -- diagnostics = { disable = { 'missing-fields' } },
             },
           },
+        },
+        -- TypeScript/JavaScript LSP
+        ts_ls = {},
+        -- HTML Language Server
+        html = {
+          filetypes = { 'html', 'htmlangular' },
+        },
+        -- CSS Language Server
+        cssls = {
+          filetypes = { 'css', 'scss', 'less' },
+        },
+        -- Emmet for HTML/CSS snippets
+        emmet_ls = {
+          filetypes = { 'html', 'htmlangular', 'css', 'scss', 'typescript', 'typescriptreact' },
         },
         angularls = {
           -- Angular language server requires some special settings
@@ -729,11 +748,12 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
-        'angular-language-server',
-        'typescript-language-server',
-        'prettier',
-        'eslint_d',
+        'stylua', -- Lua formatter
+        'angular-language-server', -- Angular LSP
+        'typescript-language-server', -- TypeScript LSP (backup/fallback)
+        'prettier', -- JS/TS formatter
+        'eslint_d', -- JS/TS linter
+        'goimports', -- Go formatter/imports organizer (gofmt comes with Go)
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -760,38 +780,40 @@ require('lazy').setup({
     cmd = { 'ConformInfo' },
     keys = {
       {
-        '<leader>f',
+        '<leader>cf',
         function()
           require('conform').format { async = true, lsp_format = 'fallback' }
         end,
         mode = '',
-        desc = '[F]ormat buffer',
+        desc = '[C]ode [F]ormat buffer',
       },
     },
     opts = {
       notify_on_error = false,
-      format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
-        local lsp_format_opt
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          lsp_format_opt = 'never'
-        else
-          lsp_format_opt = 'fallback'
-        end
-        return {
-          timeout_ms = 500,
-          lsp_format = lsp_format_opt,
-        }
-      end,
+      -- format_on_save = function(bufnr)
+      --   -- Disable "format_on_save lsp_fallback" for languages that don't
+      --   -- have a well standardized coding style. You can add additional
+      --   -- languages here or re-enable it for the disabled ones.
+      --   local disable_filetypes = { c = true, cpp = true }
+      --   local lsp_format_opt
+      --   if disable_filetypes[vim.bo[bufnr].filetype] then
+      --     lsp_format_opt = 'never'
+      --   else
+      --     lsp_format_opt = 'fallback'
+      --   end
+      --   return {
+      --     timeout_ms = 500,
+      --     lsp_format = lsp_format_opt,
+      --   }
+      -- end,
       formatters_by_ft = {
         lua = { 'stylua' },
         javascript = { 'prettier' },
         typescript = { 'prettier' },
-        html = { 'prettier' },
-        scss = { 'prettier' },
+        typescriptreact = { 'prettier' },
+        -- html: uses HTML LSP formatting via lsp_format fallback
+        -- css/scss: uses CSS LSP formatting via lsp_format fallback
+        go = { 'gofmt', 'goimports' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -937,9 +959,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-      -- vim.cmd.colorscheme 'kanagawa-wave'
-      -- vim.cmd.colorscheme 'carbonfox'
+      vim.cmd.colorscheme 'tokyonight-moon'
     end,
   },
 
@@ -1074,47 +1094,5 @@ require('lazy').setup({
   },
 })
 
--- Setup flutter-tools.nvim
-require('flutter-tools').setup {
-  dev_log = {
-    open_cmd = 'botright 15split',
-  },
-} -- use defaults
--- -- Setup oil.nvim
--- require('oil').setup()
--- -- open file_browser with the path of the current buffer
--- vim.keymap.set('n', '<space>fb', function()
---   local location = vim.api.nvim_buf_get_name(0)
---   location = location:gsub('^(.*)/.*$', '%1')
---   require('oil').toggle_float(location)
--- end)
--- Setup nvim-tree.nvim
--- require('nvim-tree').setup {
---   renderer = {
---     icons = {
---       git_placement = 'after', -- or "after" (placement of the Git icon)
---       glyphs = {
---         git = {
---           unstaged = '•', -- Modified (VS Code uses a dot)
---           staged = '+', -- Staged (VS Code uses a plus)
---           unmerged = '!', -- Merge conflict (VS Code uses an exclamation)
---           renamed = '→', -- Renamed (VS Code uses an arrow)
---           untracked = '?', -- New/untracked (VS Code uses a question mark)
---           deleted = '-', -- Deleted (VS Code uses a minus)
---           ignored = ' ', -- No icon for ignored (or use "#" if you prefer)
---         },
---       },
---     },
---   },
--- }
--- local function open_nvim_tree()
---   require('nvim-tree.api').tree.open()
--- end
--- vim.api.nvim_create_autocmd({ 'VimEnter' }, { callback = open_nvim_tree })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
-require('null-ls').setup {
-  sources = {
-    require('flutter-bloc').code_actions,
-  },
-}
