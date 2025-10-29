@@ -703,6 +703,26 @@ require('lazy').setup({
         -- CSS Language Server
         cssls = {
           filetypes = { 'css', 'scss', 'less' },
+          settings = {
+            css = {
+              validate = true,
+              lint = {
+                unknownAtRules = 'ignore', -- Ignore @tailwind and other framework-specific at-rules
+              },
+            },
+            scss = {
+              validate = true,
+              lint = {
+                unknownAtRules = 'ignore',
+              },
+            },
+            less = {
+              validate = true,
+              lint = {
+                unknownAtRules = 'ignore',
+              },
+            },
+          },
         },
         -- Emmet for HTML/CSS snippets
         emmet_ls = {
@@ -751,6 +771,9 @@ require('lazy').setup({
         'stylua', -- Lua formatter
         'angular-language-server', -- Angular LSP
         'typescript-language-server', -- TypeScript LSP (backup/fallback)
+        'html-lsp', -- HTML LSP
+        'css-lsp', -- CSS/SCSS/LESS LSP
+        'emmet-ls', -- Emmet LSP
         'prettier', -- JS/TS formatter
         'eslint_d', -- JS/TS linter
         'goimports', -- Go formatter/imports organizer (gofmt comes with Go)
