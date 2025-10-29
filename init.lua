@@ -1026,6 +1026,8 @@ require('lazy').setup({
         'css',
         'json',
         'scss',
+        'dart',
+        'go',
       }, -- Autoinstall languages that are not installed
       -- Autoinstall languages that are not installed
       auto_install = true,
