@@ -20,6 +20,13 @@ return {
       dev_log = {
         open_cmd = 'botright 15split',
       },
+      lsp = {
+        settings = {
+          dart = {
+            lineLength = 125,
+          },
+        },
+      },
     }
   end,
 }
