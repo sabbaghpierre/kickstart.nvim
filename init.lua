@@ -846,7 +846,7 @@ require('lazy').setup({
       formatters = {
         dart_format = {
           command = 'dart',
-          args = { 'format', '--line-length', '125', '--output', 'show', '--set-exit-if-changed', '-' },
+          args = { 'format', '--line-length', '125' },
           stdin = true,
         },
       },
