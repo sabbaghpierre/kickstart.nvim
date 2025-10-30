@@ -24,8 +24,15 @@ return {
         settings = {
           dart = {
             lineLength = 125,
+            completeFunctionCalls = true,
+            enableSnippets = true,
           },
         },
+      },
+      -- Use dart format with explicit line length
+      formatting = {
+        command = 'dart',
+        args = { 'format', '--line-length', '125' },
       },
     }
   end,

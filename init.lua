@@ -20,7 +20,7 @@
 =====================================================================
 =====================================================================
 
-What is Kickstart?
+What is Kickstartthe?
 
   Kickstart.nvim is *not* a distribution.
 
@@ -836,11 +836,19 @@ require('lazy').setup({
         -- html: uses HTML LSP formatting via lsp_format fallback
         -- css/scss: uses CSS LSP formatting via lsp_format fallback
         go = { 'gofmt', 'goimports' },
+        dart = { 'dart_format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      },
+      formatters = {
+        dart_format = {
+          command = 'dart',
+          args = { 'format', '--line-length', '125', '--output', 'show', '--set-exit-if-changed', '-' },
+          stdin = true,
+        },
       },
     },
   },
