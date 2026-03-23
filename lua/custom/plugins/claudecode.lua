@@ -1,7 +1,7 @@
 return {
   'coder/claudecode.nvim',
   dependencies = { 'folke/snacks.nvim' },
-  build = 'npm install -g @anthropic-ai/claude-code',
+  build = 'command -v claude >/dev/null 2>&1 || curl -fsSL https://claude.ai/install.sh | bash',
   config = true,
   opts = {
     diff_opts = {
