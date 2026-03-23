@@ -3,7 +3,8 @@ return {
   event = 'BufReadPre',
   opts = {
     user_default_options = {
-      AARRGGBB = true, -- Enable 0xAARRGGBB format (in addition to defaults)
+      AARRGGBB = true,
     },
+    suppress_deprecation = true,
   },
 }
