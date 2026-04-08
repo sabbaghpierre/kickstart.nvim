@@ -8,7 +8,7 @@ return {
     opts = {
       current_line_blame = true,
       current_line_blame_opts = {
-        delay = 0,
+        delay = 200,
         virt_text_pos = 'eol',
       },
       signs = {
@@ -17,6 +17,9 @@ return {
         delete = { text = '_' },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
+      },
+      preview_config = {
+        border = 'rounded', -- Makes the diff popup look like VS Code
       },
       on_attach = function(bufnr)
         local gitsigns = require 'gitsigns'
@@ -59,7 +62,7 @@ return {
         map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'git [u]ndo stage hunk' })
         map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
         map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
-        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
+        map('n', '<leader>hb', function() gitsigns.blame_line{full=true} end, { desc = 'git [b]lame line' })
         map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
         map('n', '<leader>hD', function()
           gitsigns.diffthis '@'
