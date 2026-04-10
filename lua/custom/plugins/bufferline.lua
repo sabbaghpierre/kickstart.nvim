@@ -3,7 +3,16 @@ return {
   version = '*',
   event = 'VeryLazy',
   dependencies = 'nvim-tree/nvim-web-devicons',
-  opts = {},
+  opts = {
+    options = {
+      sort_by = function(buffer_a, buffer_b)
+        -- Use the filename (or path) for comparison
+        -- .name is usually the display name, .path is the full path
+        return buffer_a.name < buffer_b.name
+      end,
+      show_buffer_close_icons = false,
+    },
+  },
   keys = {
     { '<Leader>bn', '<cmd>BufferLineCycleNext<CR>', desc = 'Next Buffer' },
     { '<Leader>bp', '<cmd>BufferLineCyclePrev<CR>', desc = 'Previous Buffer' },
