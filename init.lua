@@ -1,6 +1,9 @@
 -- Recommended for faster startup
 vim.loader.enable()
 
+-- Use Homebrew curl (OpenSSL) instead of macOS system curl (LibreSSL) to avoid SSL errors
+vim.env.PATH = '/opt/homebrew/opt/curl/bin:' .. vim.env.PATH
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -10,13 +13,10 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*.go',
   group = vim.api.nvim_create_augroup('golang-auto-import', { clear = true }),
   callback = function()
-    local params = vim.lsp.util.make_range_params()
+    local client = vim.lsp.get_clients({ bufnr = 0, name = 'gopls' })[1]
+    if not client then return end
+    local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
     params.context = { only = { 'source.organizeImports' } }
-    -- buf_request_sync defaults to a 1000ms timeout. Depending on your
-    -- machine and codebase, you may want longer. Add an additional
-    -- argument after params if you find that you have to write the file
-    -- twice for changes to be saved.
-    -- E.g., vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
     local result = vim.lsp.buf_request_sync(0, 'textDocument/codeAction', params)
     for cid, res in pairs(result or {}) do
       for _, r in pairs(res.result or {}) do
@@ -151,7 +151,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
   local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
   if vim.v.shell_error ~= 0 then
@@ -285,7 +285,6 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -497,26 +496,13 @@ require('lazy').setup({
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
-          -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
-          ---@param client vim.lsp.Client
-          ---@param method vim.lsp.protocol.Method
-          ---@param bufnr? integer some lsp support methods only in specific files
-          ---@return boolean
-          local function client_supports_method(client, method, bufnr)
-            if vim.fn.has 'nvim-0.11' == 1 then
-              return client:supports_method(method, bufnr)
-            else
-              return client.supports_method(method, { bufnr = bufnr })
-            end
-          end
-
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           --    See `:help CursorHold` for information about when this is executed
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
             local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -543,7 +529,7 @@ require('lazy').setup({
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
-          if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
@@ -678,7 +664,7 @@ require('lazy').setup({
               new_root_dir .. '/node_modules',
             }
           end,
-          filetypes = { 'typescript', 'html', 'typescriptreact', 'typescript.tsx' },
+          filetypes = { 'typescript', 'html', 'htmlangular', 'typescriptreact', 'typescript.tsx' },
           root_dir = require('lspconfig.util').root_pattern('angular.json', 'project.json'),
         },
       }
@@ -698,15 +684,22 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Lua formatter
-        'angular-language-server', -- Angular LSP
-        'typescript-language-server', -- TypeScript LSP (backup/fallback)
-        'html-lsp', -- HTML LSP
-        'css-lsp', -- CSS/SCSS/LESS LSP
-        'emmet-ls', -- Emmet LSP
-        'prettier', -- JS/TS formatter
-        'eslint_d', -- JS/TS linter
-        'goimports', -- Go formatter/imports organizer (gofmt comes with Go)
+        -- Lua
+        'lua-language-server', -- explicit (lspconfig: lua_ls)
+        'stylua',              -- Lua formatter
+        -- TypeScript / JavaScript / Angular
+        'typescript-language-server', -- lspconfig: ts_ls
+        'angular-language-server',    -- lspconfig: angularls
+        'html-lsp',                   -- lspconfig: html
+        'css-lsp',                    -- lspconfig: cssls
+        'emmet-ls',                   -- lspconfig: emmet_ls
+        'prettier',                   -- JS/TS/HTML/CSS formatter
+        'eslint_d',                   -- JS/TS linter
+        -- Go (requires Go SDK installed separately: https://go.dev/dl)
+        'gopls',      -- lspconfig: gopls
+        'goimports',  -- formatter/imports organizer (gofmt ships with Go)
+        -- Dart/Flutter: handled by flutter-tools.nvim via Flutter SDK
+        -- Install Flutter SDK separately: https://flutter.dev/docs/get-started/install
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -966,48 +959,30 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    branch = 'master',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = {
-        'bash',
-        'c',
-        'diff',
-        'html',
-        'lua',
-        'luadoc',
-        'markdown',
-        'markdown_inline',
-        'query',
-        'vim',
-        'vimdoc',
-        'typescript',
-        'tsx',
-        'css',
-        'json',
-        'scss',
-        'dart',
-        'go',
-      }, -- Autoinstall languages that are not installed
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+    lazy = false,
+    config = function()
+      -- Install parsers (no-op if already installed)
+      require('nvim-treesitter').install({
+        'bash', 'c', 'diff', 'html', 'lua', 'luadoc',
+        'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
+        'javascript', 'typescript', 'tsx', 'css', 'json', 'scss',
+        'yaml', 'toml', 'gitcommit',
+        'dart', 'go',
+      })
+      -- htmlangular is Angular's filetype for .html files — reuse the html parser
+      vim.treesitter.language.register('html', 'htmlangular')
+      -- Enable treesitter highlighting and indent for all filetypes
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = '*',
+        callback = function()
+          pcall(vim.treesitter.start)
+          if vim.bo.filetype ~= 'ruby' then
+            vim.opt_local.indentexpr = 'v:lua.vim.treesitter.indentexpr()'
+          end
+        end,
+      })
+    end,
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
