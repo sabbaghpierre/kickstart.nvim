@@ -957,26 +957,27 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
-  { -- Highlight, edit, and navigate code
-    'nvim-treesitter/nvim-treesitter',
-    build = ':TSUpdate',
+  { -- Tree-sitter parser manager (replaces nvim-treesitter)
+    'romus204/tree-sitter-manager.nvim',
     lazy = false,
     config = function()
-      -- Install parsers (no-op if already installed)
-      require('nvim-treesitter').install({
-        'bash', 'c', 'diff', 'html', 'lua', 'luadoc',
-        'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
-        'javascript', 'typescript', 'tsx', 'css', 'json', 'scss',
-        'yaml', 'toml', 'gitcommit',
-        'dart', 'go',
-      })
+      require('tree-sitter-manager').setup {
+        ensure_installed = {
+          'bash', 'c', 'diff', 'html', 'lua', 'luadoc',
+          'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
+          'javascript', 'typescript', 'tsx', 'css', 'json', 'scss',
+          'yaml', 'toml', 'gitcommit',
+          'dart', 'go',
+        },
+        highlight = true,
+        auto_install = true,
+      }
       -- htmlangular is Angular's filetype for .html files — reuse the html parser
       vim.treesitter.language.register('html', 'htmlangular')
-      -- Enable treesitter highlighting and indent for all filetypes
+      -- Enable treesitter indent for all filetypes
       vim.api.nvim_create_autocmd('FileType', {
         pattern = '*',
         callback = function()
-          pcall(vim.treesitter.start)
           if vim.bo.filetype ~= 'ruby' then
             vim.opt_local.indentexpr = 'v:lua.vim.treesitter.indentexpr()'
           end
