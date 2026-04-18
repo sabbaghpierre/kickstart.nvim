@@ -42,10 +42,16 @@ autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
   end,
 })
 
--- Handle swap file conflicts during session restore
+-- Handle swap file conflicts during session restore.
+-- Only bypass the swap warning when auto-session is actively restoring a
+-- session (vim.g.restoring_session is set by our pre/post restore hooks below).
+-- Outside of that, the swap dialog shows normally to protect against opening
+-- the same file in two Neovim instances simultaneously.
 autocmd('SwapExists', {
   callback = function()
-    vim.v.swapchoice = 'e'
+    if vim.g.restoring_session then
+      vim.v.swapchoice = 'e'
+    end
   end,
 })
 

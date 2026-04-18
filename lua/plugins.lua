@@ -76,7 +76,6 @@ vim.pack.add({
   -- Editing
   { src = "https://github.com/windwp/nvim-autopairs" },
   { src = "https://github.com/tpope/vim-sleuth" },
-  { src = "https://github.com/mg979/vim-visual-multi" },
   { src = "https://github.com/jake-stewart/multicursor.nvim" },
 
   -- Formatting & Linting
@@ -238,8 +237,13 @@ vim.treesitter.language.register('html', 'htmlangular')
 vim.api.nvim_create_autocmd('FileType', {
   pattern = '*',
   callback = function()
-    pcall(vim.treesitter.start)
-    if vim.bo.filetype ~= 'ruby' then
+    -- Only override indentexpr when treesitter actually starts successfully.
+    -- If there's no parser for this filetype, vim.treesitter.start() errors
+    -- and we leave indentexpr alone so Vim's built-in indent logic takes over.
+    -- (Previously this was set unconditionally, breaking indentation for any
+    -- filetype without a parser since treesitter.indentexpr() returns -1.)
+    local ok = pcall(vim.treesitter.start)
+    if ok then
       vim.opt_local.indentexpr = 'v:lua.vim.treesitter.indentexpr()'
     end
   end,
@@ -388,6 +392,21 @@ require('nvim-autopairs').setup({})
 
 local mc = require('multicursor-nvim')
 mc.setup()
+
+-- oil.nvim's multicursor integration may fire a cursor-constraint callback
+-- after the oil buffer is destroyed, causing "Index out of bounds" inside
+-- mc.action. Wrap mc.action so that specific error is silently swallowed.
+local _orig_action = mc.action
+mc.action = function(fn)
+  return _orig_action(function(ctx)
+    local ok, err = pcall(fn, ctx)
+    if not ok and type(err) == 'string' and err:match('Index out of bounds') then
+      return
+    elseif not ok then
+      error(err, 0)
+    end
+  end)
+end
 vim.keymap.set('n', '<c-leftmouse>', mc.handleMouse)
 vim.keymap.set('n', '<c-leftdrag>', mc.handleMouseDrag)
 vim.keymap.set('n', '<c-leftrelease>', mc.handleMouseRelease)
@@ -458,6 +477,10 @@ require('auto-session').setup({
       end
     end,
   },
+  -- Set a flag while restoring so the SwapExists autocmd knows to bypass the
+  -- swap dialog (stale swap files from a previous crash are expected here).
+  pre_restore_cmds = { function() vim.g.restoring_session = true end },
+  post_restore_cmds = { function() vim.g.restoring_session = false end },
 })
 
 ----------------------------------------------------------------------
