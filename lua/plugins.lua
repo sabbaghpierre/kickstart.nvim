@@ -113,7 +113,8 @@ require('tokyonight').setup({
   styles = { comments = { italic = false } },
 })
 require('pastel').setup({})
-vim.cmd.colorscheme('pasteldark')
+-- vim.cmd.colorscheme('pasteldark')
+vim.cmd.colorscheme('tokyonight')
 
 ----------------------------------------------------------------------
 -- UI Plugins
