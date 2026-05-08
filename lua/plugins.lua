@@ -15,7 +15,8 @@
 --
 --   Mason auto-installs these LSP servers / formatters / linters:
 --     lua-language-server, stylua, typescript-language-server, angular-language-server,
---     html-lsp, css-lsp, emmet-ls, prettier, eslint_d, gopls, goimports
+--     html-lsp, css-lsp, emmet-ls, prettier, eslint_d
+--   Deferred (installed on first Go file open): gopls, goimports
 --
 --   After first install:
 --     1. Run `:Mason` to verify all tools installed successfully
@@ -277,11 +278,27 @@ require('mason-tool-installer').setup({
     'emmet-ls',
     'prettier',
     'eslint_d',
-    -- Go
-    'gopls',
-    'goimports',
+    -- Go: gopls/goimports are installed lazily on first Go file (see autocmd below)
     -- Dart/Flutter: handled by flutter-tools.nvim via Flutter SDK
   },
+})
+
+-- Go: install LSP/formatter tools lazily on first Go file open
+local go_tools_loaded = false
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'go', 'gomod', 'gowork', 'gotmpl' },
+  callback = function()
+    if go_tools_loaded then return end
+    go_tools_loaded = true
+    local ok, registry = pcall(require, 'mason-registry')
+    if not ok then return end
+    for _, name in ipairs({ 'gopls', 'goimports' }) do
+      local pkg_ok, pkg = pcall(registry.get_package, name)
+      if pkg_ok and not pkg:is_installed() then
+        pkg:install()
+      end
+    end
+  end,
 })
 
 require('lazydev').setup({
