@@ -11,8 +11,8 @@ opt.mouse = 'a'
 -- Appearance
 opt.showmode = false
 opt.cursorline = true
-opt.guicursor = 'i:block'
-opt.colorcolumn = '80'
+-- opt.guicursor = 'i:block'
+-- opt.colorcolumn = '80'
 opt.termguicolors = true
 opt.signcolumn = 'yes'
 opt.wrap = false
