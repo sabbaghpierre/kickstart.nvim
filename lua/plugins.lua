@@ -105,6 +105,9 @@ vim.pack.add({
   -- requires: claude CLI — install with: curl -fsSL https://claude.ai/install.sh | bash
   { src = "https://github.com/coder/claudecode.nvim" },
   { src = "https://github.com/folke/snacks.nvim" },
+
+  --LiveServer
+  { src = "https://git.barrettruth.com/barrettruth/live-server.nvim" },
 })
 
 ----------------------------------------------------------------------

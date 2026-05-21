@@ -140,6 +140,13 @@ keymap('n', '<leader>aa', '<cmd>ClaudeCodeDiffAccept<cr>', { desc = 'Accept diff
 keymap('n', '<leader>ad', '<cmd>ClaudeCodeDiffDeny<cr>', { desc = 'Deny diff' })
 
 ----------------------------------------------------------------------
+-- LiveServer
+----------------------------------------------------------------------
+keymap('n', '<leader>ls', '<cmd>LiveServerStart<cr>', { desc = 'Live Server Start' })
+keymap('n', '<leader>lS', '<cmd>LiveServerStop<cr>', { desc = 'Live Server Stop' })
+
+
+----------------------------------------------------------------------
 -- Plugin updates
 ----------------------------------------------------------------------
 keymap('n', '<leader>ps', '<cmd>lua vim.pack.update()<CR>', { desc = '[P]ack update plugin[s]' })
